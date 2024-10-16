@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+	<mapper namespace="com.project.springboot.dao.IinquiryBoardDao">
+		<select id="listDao" resultType="com.project.springboot.dto.inquiryBoardDto">
+			SELECT * FROM (
+            SELECT Tb.*, ROWNUM rNum FROM (
+            SELECT * FROM inquiryBoard
+	     		<if test="searchWord != null and searchWord != ''">
+							WHERE ${searchField} Like '%${searchWord}%'
+							OR parentId Like '%${searchWord}%'
+				</if>            
+            START WITH parentIdx=0
+            CONNECT BY PRIOR idx = parentIdx
+            ORDER SIBLINGS BY idx DESC
+            ) Tb )
+            WHERE rNum BETWEEN ${start} AND ${end}
+        </select>
+
+		
+		<select id="listCountDao" resultType="int">
+			select count(*) from inquiryBoard 
+				<if test="searchWord != null and searchWord != ''">
+					where ${searchField} 
+					Like '%${searchWord}%'
+				</if>
+		</select>
+		
+		<select id="viewDao" resultType="com.project.springboot.dto.inquiryBoardDto">
+			select * from inquiryBoard where idx = #{_idx}
+		</select>
+		
+		<insert id="writeDao" parameterType="java.util.HashMap">
+			insert into inquiryBoard (idx, id, title, content, ofile, sfile, isAnnouncement, boardPass)
+					values (inquiryBoard_seq.nextval, #{id}, #{title}, #{content}, #{ofile, jdbcType=VARCHAR}, #{sfile, jdbcType=VARCHAR}, 'N', #{boardPass})			
+		</insert>
+		
+		<insert id="replyWriteDao" parameterType="java.util.HashMap">
+			insert into inquiryBoard (idx, id, parentId, title, content, ofile, sfile, isAnnouncement, boardPass, parentIdx)
+			values (inquiryBoard_seq.nextval, #{item1}, #{item2}, #{item3}, #{item4}, #{item5, jdbcType=VARCHAR}, #{item6, jdbcType=VARCHAR}, 'Y', #{item7}, #{item8})
+		</insert>
+		
+		<delete id="deleteDao">
+			delete from inquiryBoard where idx = #{_idx}
+		</delete>
+		
+		<update id="viewCountDao">
+			update inquiryBoard SET viewCount=viewCount+1 where idx = #{_idx}
+		</update>
+		
+		<update id="editorDao">
+			update inquiryBoard 
+				SET id = #{mId},
+					title = #{mTitle},
+					content = #{mContent},
+					ofile = #{moFileName, jdbcType=VARCHAR},
+					sfile = #{msFileName, jdbcType=VARCHAR}
+				where idx = #{mIdx}
+		</update>
+		
+		<update id="responsesCountDao">
+			update inquiryBoard SET responses=responses+1 where idx = #{_idx}
+		</update>
+		
+		<select id="getTotalCount" resultType="int">
+	        SELECT COUNT(*) FROM inquiryBoard
+	    </select>
+	    
+	    <update id="changeBoardPass">
+	    	update inquiryBoard 
+		    SET boardPass= #{_boardPass}
+		    where idx = #{_idx} or parentIdx = #{_idx}
+	    </update>
+		
+	</mapper>

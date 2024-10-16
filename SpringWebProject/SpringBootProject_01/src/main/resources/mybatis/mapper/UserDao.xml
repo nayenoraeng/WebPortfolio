@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.springboot.dao.IMemberDao">
+
+	<insert id="joinDao" parameterType="com.project.springboot.dto.UserDTO">
+		INSERT INTO member (id, pass, name, phoneNum, email, postcode, address, detailaddress, regidate, authority, enabled, provider, providerId, IsLock, failCount, LockTime)
+			VALUES (#{id}, #{pass}, #{name}, #{phoneNum}, #{email}, #{postcode}, #{address}, #{detailaddress}, #{regidate}, DEFAULT, DEFAULT, DEFAULT, NULL, DEFAULT, DEFAULT, NULL)
+	</insert>
+	
+	<insert id="joinSocial" parameterType="com.project.springboot.dto.UserDTO">
+		INSERT INTO member (id, name, email, provider, providerId)
+			VALUES (#{id}, #{name}, #{email}, #{provider}, #{providerId})
+	</insert>
+	
+	<select id="idCheck" resultType="int">
+        SELECT count(*) FROM member WHERE id = #{id}
+    </select>
+    
+	<select id="findByUsername" resultType="com.project.springboot.dto.UserDTO">
+	SELECT * FROM member WHERE id = #{id} 
+	</select>
+    
+  
+ 	 <select id="findBySocailrname" resultType="com.project.springboot.dto.UserDTO">
+		SELECT * FROM member
+		 <where>
+        <!-- id가 제공된 경우 -->
+        <if test="providerId == null">
+            id = #{id}
+        </if>
+        <!-- providerId가 제공된 경우 -->
+        <if test="providerId != null">
+            providerId = #{providerId}
+        </if>
+    </where>
+	</select>
+	
+	<!--로그인 실패 횟수 카운트 -->
+	<update id="updateFailCount">
+		UPDATE member
+		SET failCount = #{failCount}
+		WHERE id = #{id}
+	</update>
+   
+   	<update id="updateUserLockStatus">
+	   	UPDATE member
+		SET isLock = #{isLock},
+		failCount = #{failCount},
+		lockTime = #{lockTime}
+		WHERE id = #{id}
+   	</update>
+   	
+   	<!-- 잠금 전 로그인 성공 카운트 초기화 -->
+	<update id="updateCountReset">
+		UPDATE member
+		SET failCount= 0
+		WHERE id = #{id}
+	</update>
+	
+	<update id="updateUnLock">
+	   	UPDATE member
+		SET isLock = #{isLock},
+		failCount = #{failCount},
+		lockTime = NULL
+		WHERE id = #{id}
+   	</update>
+
+	<!-- 관리자 페이지 전체 회원목록 카운트-->
+	<select id="getTotalCount" resultType="int"
+    	parameterType="com.project.springboot.dto.ParameterDTO">
+    	SELECT COUNT(*) from member
+    	<if test="searchWord!=null and !searchWord.equals('')">
+    	WHERE ${searchField} LIKE '%'||#{searchWord}||'%'
+    	</if>
+    </select>
+    
+</mapper>

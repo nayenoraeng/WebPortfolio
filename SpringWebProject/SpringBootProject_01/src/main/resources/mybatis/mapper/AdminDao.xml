@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.project.springboot.dto.AdminService">
+	
+	<!-- 잠금 회원만 -->
+	<select id="findByLockMem" parameterType="com.project.springboot.dto.ParameterDTO"
+								resultType="com.project.springboot.dto.AdminMemberDTO">
+		SELECT * FROM member WHERE IsLock = 0
+		<if test="searchWord!=null and !searchWord.equals('')">
+			AND
+		 	<foreach collection="searchField" item="sfield" open="("
+		 		close=")" separator="or">
+		 		${sfield} like '%'||#{searchWord}||'%'
+		 	</foreach>
+		</if>
+		order by regidate desc
+	</select>
+	
+		<!--비활성화 회원만 -->
+	<select id="findByEndMem" parameterType="com.project.springboot.dto.ParameterDTO"
+								resultType="com.project.springboot.dto.AdminMemberDTO">
+		SELECT * FROM member WHERE enabled = 0
+		<if test="searchWord!=null and !searchWord.equals('')">
+			AND
+		 	<foreach collection="searchField" item="sfield" open="("
+		 		close=")" separator="or">
+		 		${sfield} like '%'||#{searchWord}||'%'
+		 	</foreach>
+		</if>
+		order by regidate desc
+	</select>
+	
+	
+	
+	<!--  회원 상세 정보 조회 -->
+	<select id="selectOne" resultType="com.project.springboot.dto.AdminMemberDTO" >
+		SELECT id, name, phoneNum, email, postcode, address, detailaddress, regidate, authority, isLock, enabled FROM member WHERE id=#{id}
+	</select>
+	
+		<!-- 소셜회원 상세 정보 조회 -->
+	<select id="selectOneSocial" resultType="com.project.springboot.dto.AdminMemberDTO" >
+		SELECT provider, providerId, name, phoneNum, email, postcode, address, detailaddress, regidate, authority, isLock, enabled
+		FROM member WHERE providerId = #{providerId}
+	</select>
+	
+	<!-- 회원 권한 수정 -->
+	<update id="updateUserAuth">
+        UPDATE member
+        SET authority = #{authority}
+        WHERE id = #{id}
+    </update>
+    
+    <!--회원 활성화 수정 -->
+    <update id="updateEnabled">
+        UPDATE member
+        SET enabled = #{enabled}
+        WHERE id = #{id}
+    </update>
+    
+    <!-- 전체회원목록 -->
+    <select id="userListPage" resultType="com.project.springboot.dto.AdminMemberDTO"
+    	parameterType="com.project.springboot.dto.ParameterDTO">
+    	SELECT id, name, phoneNum, email, postcode, address, detailaddress,
+    	regidate, authority, enabled, isLock FROM (
+    		SELECT Tb.*, rownum rNum FROM (
+    			SELECT * FROM member
+    			<if test="searchWord!=null and !searchWord.equals('')">
+    				WHERE ${searchField} LIKE '%'||#{searchWord}||'%'
+    			</if>
+    			ORDER  BY regidate DESC
+    		) Tb
+    	)
+    	WHERE rNum<![CDATA[>=]]>#{start} AND rNum<![CDATA[<=]]>#{end}
+    </select>
+    
+    <!-- 조건 별 멤버 조회 -->
+	<!-- 일반회원만 -->
+     <select id="localMemList" resultType="com.project.springboot.dto.AdminMemberDTO"
+    	parameterType="com.project.springboot.dto.ParameterDTO">
+    	SELECT * FROM (
+	        SELECT Tb.*, ROWNUM rNum FROM (
+	            SELECT id, name, phoneNum, email, postcode, address, detailaddress,
+	                   regidate, authority, enabled, isLock
+	            FROM member WHERE provider = 'LOCAL'
+	            <if test="searchWord != null and !searchWord.equals('')">
+	                AND ${searchField} LIKE '%' || #{searchWord} || '%'
+	            </if>
+	            ORDER BY regidate DESC
+	        ) Tb
+	    )
+    	WHERE rNum<![CDATA[>=]]>#{start} AND rNum<![CDATA[<=]]>#{end}
+    </select>
+    
+    	<!-- 관리자 페이지 일반 회원목록 카운트-->
+	<select id="getTotalCountLocal" resultType="int"
+    	parameterType="com.project.springboot.dto.ParameterDTO">
+    	SELECT COUNT(*) from member WHERE provider = 'LOCAL'
+    	<if test="searchWord!=null and !searchWord.equals('')">
+    	AND ${searchField} LIKE '%'||#{searchWord}||'%'
+    	</if>
+    </select>
+    
+   <!-- 소셜 회원만 -->
+     <select id="SocialMemList" resultType="com.project.springboot.dto.AdminMemberDTO"
+    	parameterType="com.project.springboot.dto.ParameterDTO">
+    	SELECT * FROM (
+	        SELECT Tb.*, ROWNUM rNum FROM (
+	            SELECT provider, providerId, name, phoneNum, email, postcode, address, detailaddress,
+	                   regidate, authority, enabled, isLock
+	            FROM member WHERE provider != 'LOCAL'
+	            <if test="searchWord != null and !searchWord.equals('')">
+	                AND ${searchField} LIKE '%' || #{searchWord} || '%'
+	            </if>
+	            ORDER BY regidate DESC
+	        ) Tb
+	    )
+    	WHERE rNum<![CDATA[>=]]>#{start} AND rNum<![CDATA[<=]]>#{end}
+    </select>
+    
+    	<!-- 관리자 페이지 소셜 회원목록 카운트-->
+	<select id="getTotalCountSocial" resultType="int"
+    	parameterType="com.project.springboot.dto.ParameterDTO">
+    	SELECT COUNT(*) from member WHERE provider != 'LOCAL'
+    	<if test="searchWord!=null and !searchWord.equals('')">
+    	AND ${searchField} LIKE '%'||#{searchWord}||'%'
+    	</if>
+    </select>
+    
+     <!-- 잠금 회원만 -->
+     <select id="LockMemList" resultType="com.project.springboot.dto.AdminMemberDTO"
+    	parameterType="com.project.springboot.dto.ParameterDTO">
+    	SELECT * FROM (
+	        SELECT Tb.*, ROWNUM rNum FROM (
+	            SELECT id, name, isLock, failCount, lockTime, regidate
+	            FROM member WHERE IsLock = 0
+	            <if test="searchWord != null and !searchWord.equals('')">
+	                AND ${searchField} LIKE '%' || #{searchWord} || '%'
+	            </if>
+	            ORDER BY regidate DESC
+	        ) Tb
+	    )
+    	WHERE rNum<![CDATA[>=]]>#{start} AND rNum<![CDATA[<=]]>#{end}
+    </select>
+    
+    	<!-- 관리자 페이지 잠금 회원목록 카운트-->
+	<select id="getTotalCountLock" resultType="int"
+    	parameterType="com.project.springboot.dto.ParameterDTO">
+    	SELECT COUNT(*) from member WHERE IsLock = 0
+    	<if test="searchWord!=null and !searchWord.equals('')">
+    	AND ${searchField} LIKE '%'||#{searchWord}||'%'
+    	</if>
+    </select>
+    
+    <!--회원 잠금 수정 -->
+	<update id="updateLock">
+	    UPDATE member
+	    SET isLock = #{isLock},
+	        failCount = CASE
+	                        WHEN #{isLock} = 1 THEN 0
+	                        ELSE 5
+	                    END,
+	        lockTime = CASE
+	                        WHEN #{isLock} = 1 THEN NULL
+	                        ELSE CURRENT_TIMESTAMP
+	                    END
+	    WHERE id = #{id}
+	</update>
+
+     <!-- 비활성화 회원만 -->
+     <select id="EnabledMemList" resultType="com.project.springboot.dto.AdminMemberDTO"
+    	parameterType="com.project.springboot.dto.ParameterDTO">
+    	SELECT * FROM (
+	        SELECT Tb.*, ROWNUM rNum FROM (
+	            SELECT id, name, email, enabled, regidate
+	            FROM member WHERE enabled = 0
+	            <if test="searchWord != null and !searchWord.equals('')">
+	                AND ${searchField} LIKE '%' || #{searchWord} || '%'
+	            </if>
+	            ORDER BY regidate DESC
+	        ) Tb
+	    )
+    	WHERE rNum<![CDATA[>=]]>#{start} AND rNum<![CDATA[<=]]>#{end}
+    </select>
+    
+    	<!-- 관리자 페이지 비활성화 회원목록 카운트-->
+	<select id="getTotalCountEnabled" resultType="int"
+    	parameterType="com.project.springboot.dto.ParameterDTO">
+    	SELECT COUNT(*) from member WHERE enabled = 0
+    	<if test="searchWord!=null and !searchWord.equals('')">
+    	AND ${searchField} LIKE '%'||#{searchWord}||'%'
+    	</if>
+    </select>
+    
+    
+    
+    
+</mapper>

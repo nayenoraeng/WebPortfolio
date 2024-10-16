@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.project.springboot.dao.InoticeBoardDao">
+	
+	<select id="listDao" resultType="com.project.springboot.dto.noticeBoardDto">
+		 select * from 
+	     	(select Tb.*, rownum rNum from
+	     	(select * from noticeBoard
+	    <if test="searchWord != null and searchWord != ''">
+			where ${searchField} like '%${searchWord}%' 
+		</if>
+				order by idx desc
+		)Tb ) WHERE rNum BETWEEN #{start} AND #{end}
+	</select>
+	
+	<select id="totalCountDao">
+		select count(*) from noticeBoard
+			<if test="searchWord != null and searchWord != ''">
+				where ${searchField} like '%${searchWord}%'
+			</if>
+	</select>
+	
+	<select id="viewDao" resultType="com.project.springboot.dto.noticeBoardDto">
+		select * from noticeBoard where idx = #{param1}
+	</select>
+	
+	<insert id="writeDao">
+		insert into noticeBoard (idx, id, title, content, ofile, sfile)
+			values (noticeBoard_seq.nextval, #{id}, #{title}, #{content}, #{ofile, jdbcType=VARCHAR}, #{sfile, jdbcType=VARCHAR})
+	</insert>
+	
+	<delete id="deleteDao">
+		delete from noticeBoard where idx = #{param1}
+	</delete>
+	
+	<update id="editorDao">
+		update noticeBoard set title = #{title}, content = #{content}, ofile = #{ofile, jdbcType=VARCHAR}, sfile = #{sfile, jdbcType=VARCHAR} where idx=#{idx}
+	</update>
+	
+	<update id="viewCountDao">
+		update noticeBoard set viewCount=viewCount+1 where idx=#{param1}
+	</update>
+	
+	<update id="likeCountDao">
+		update noticeBoard set likeCount=likeCount+1 where idx=#{param1}
+	</update>
+</mapper>

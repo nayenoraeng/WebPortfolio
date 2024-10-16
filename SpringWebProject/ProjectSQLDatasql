@@ -1,0 +1,98 @@
+alter session set "_ORACLE_SCRIPT"=true;
+
+create user PROJECT identified by 1234;
+
+--테이블 스페이스 권한 주기
+grant connect, resource, unlimited tablespace to PROJECT;
+--테이블 스페이스 리스트 확인
+select tablespace_name, status, contents from dba_tablespaces;
+--테이블스페이스에 용량 확인
+select tablespace_name, sum(bytes), max(bytes) from dba_free_space group by tablespace_name;
+--개인 계정이 어느 테이블스페이스에 들어있는지 확인
+select username, default_tablespace from dba_users where username in upper('PROJECT');
+
+--PROJECT계정에 users 테이블 스페이스에 데이터를 입력할 수 있도록 5m의 용량 할당
+alter user PROJECT quota 5m on users;
+
+CREATE TABLE member (
+    id varchar2(50) not null,
+    pass varchar2(100) not null,
+    name varchar2(50) not null,
+    phoneNum varchar2(20) not null,
+    email varchar2(50) not null,
+    postcode varchar(10) not null,
+    address varchar2(200) not null,
+    detailaddress varchar2(200) not null,
+    regidate Date DEFAULT SYSDATE not null,
+    authority varchar2(20) default 'ROLE_USER',
+    enabled number(1) detault 1,
+    primary key(id)
+);
+
+
+create table board (
+    idx varchar2(10) not null,
+    id varchar2(50) not null,
+    title varchar2(50) not null,
+    content varchar2(1000) not null,
+    postdate Date default sysdate not null,
+    viewCount number(6) default 0 not null,
+    likeCount number(6) default 0 not null,
+    ofile varchar2(200), 
+	sfile varchar2(30),
+    isAnnouncement varchar2(1) not null,
+    primary key(idx)
+);
+
+
+alter table board
+    add constraint board_mem_fk foreign key (id)
+    references member(id);
+    
+create sequence board_seq
+    increment by 1  -- 1식 증가
+    start with 1    -- 시작값 1
+    minvalue 1      -- 최소값 1
+    nomaxvalue      -- 최대값은 무한대
+    nocycle         -- 순환 x
+    nocache;        -- 캐시 사용 안함
+    
+<<<<<<< HEAD
+commit;
+
+insert into member values ('project', '1234', '12345','경기도 고양시 정발산', '010-1234-5678', '관리자', sysdate, 'asdf@naver.com', 'Y');
+
+-- 공지 테이블
+create table InquiryBoard (
+    idx varchar2(10) not null,
+    id varchar2(50) not null,
+    title varchar2(50) not null,
+    content varchar2(1000) not null,
+    postdate Date default sysdate not null,
+    viewCount number(6) default 0 not null,
+    likeCount number(6) default 0 not null,
+    ofile varchar2(200), 
+	sfile varchar2(30),
+    isAnnouncement varchar2(1) not null,
+    boardPass  number(6) not null,
+    primary key(idx)
+);
+-- 공지 테이블 외래키
+alter table InquiryBoard
+    add constraint board_mem_fk foreign key (id)
+    references member(id);
+
+
+
+=======
+alter table member modify pass varchar(100);
+
+INSERT INTO member VALUES ('test1', '1234', '12345', '경기도 고양시', '01012345678', '홍길동', sysdate, 'test1@test.com', 'N');
+
+select * from member;
+
+drop table board;
+drop table member;
+DROP SEQUENCE board_seq;
+    
+commit;

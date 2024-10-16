@@ -1,0 +1,4 @@
+/.metadata/
+SpringBootProject_01/src/main/resources/serviceAccountKey.json
+SpringBootProject_01/src/main/resources/ChatServiceAccountKey.json
+SpringBootProject_01/src/main/resources/application-oauth.properties

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.project.springboot.dao.IBoardInfoCommentDao">
+	<select id="listComment" parameterType="com.project.springboot.dto.BoardInfoCommentDto" resultType="com.project.springboot.dto.BoardInfoCommentDto">
+		SELECT * FROM boardInfoComment
+        WHERE refGroup = #{refGroup} AND deleted = 0
+        ORDER BY regidate DESC	
+	</select>
+	<insert id="writeComment">
+		INSERT INTO boardInfoComment (cIdx, writer, commentText, refGroup)
+			VALUES (boardInfoComment_seq.nextval, #{writer}, #{commentText}, #{refGroup})
+	</insert>
+	<update id="deleteComment">
+	<!-- 결과 값이 없으므로 resultType 생략  -->
+		UPDATE boardInfoComment
+		SET deleted = '1'
+		WHERE cidx = #{cidx}
+	</update>
+	<update id="editComment">
+		UPDATE boardInfoComment 
+		SET commentText = #{commentText}
+		WHERE cidx = #{cidx}
+	</update>
+	<select id="getCommentData" parameterType="String" resultType="com.project.springboot.dto.BoardInfoCommentDto">
+		SELECT cIdx, refGroup, commentText, writer, regidate
+		FROM boardInfoComment
+		WHERE cidx = #{cidx}
+	</select>
+</mapper>

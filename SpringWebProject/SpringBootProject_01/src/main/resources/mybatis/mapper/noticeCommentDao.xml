@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.project.springboot.dao.InoticeCommentDao">
+	<select id="listDao" resultType="com.project.springboot.dto.noticeCommentDto">
+		select * from noticeComment where idx = ${idx}
+	</select>
+	
+	<insert id="writeDao" parameterType="com.project.springboot.dto.noticeCommentDto">
+		insert into noticeComment (coidx, idx, id, content)
+			values (noticeComment_seq.nextval, #{param1}, #{param2}, #{param3})
+	</insert>
+	
+	<delete id="deleteDao">
+		delete from noticeComment where coidx = #{param1}
+	</delete>
+	
+	<update id="editorDao">
+		update noticeComment set content = #{content} where coidx = #{coidx}
+	</update>
+</mapper>

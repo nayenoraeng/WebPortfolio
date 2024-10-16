@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.springboot.dao.IMemberDao">
+    <update id="editDao">
+    	UPDATE member
+    	SET name=#{name},
+    		phoneNum=#{phoneNum}, 
+    		email=#{email}, 
+    		postcode=#{postcode}, 
+    		address=#{address}, 
+    		detailaddress=#{detailaddress}
+    	WHERE id=#{id}
+    </update>
+    
+   <update id="socialeditDao">
+    	UPDATE member
+    	SET name=#{name}, 
+    		phoneNum=#{phoneNum}, 
+    		email=#{email}, 
+    		postcode=#{postcode}, 
+    		address=#{address}, 
+    		detailaddress=#{detailaddress}
+    	WHERE providerId=#{providerId}
+    </update>
+    
+    <update id="deleteDao" parameterType="String">
+    	UPDATE member
+    	SET enabled= 0
+    	WHERE id=#{id}
+    </update>
+    
+   <update id="passChangeDao">
+        UPDATE member
+        SET pass = #{pass}
+        WHERE id = #{id}
+    </update>
+    
+    <select id="passCheckDao" parameterType="String" resultType="String">
+    	SELECT pass FROM member WHERE id=#{id}
+    </select>
+    
+    
+</mapper>

@@ -1,0 +1,7 @@
+INDEX VERSION 1.4+/Users/yerim/DevData/WebPortfolio/.metadata/.plugins/org.eclipse.wst.jsdt.core/indexes
+1633408921.index
+2417383418.index
+4095201327.index
+692166967.index
+1924552853.index
+3510127644.index
